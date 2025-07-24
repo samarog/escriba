@@ -1,0 +1,21 @@
+<%- include('partials/header.ejs') %>
+
+  <div class="stacker">
+
+  <div class="makepost">
+      <h2> Write me </h2>
+<form action="/sendmail" method="POST" class="makepost">
+  <div class="input-stack">
+    <textarea name="message" id="txt" placeholder="Leave your message..." onclick="this.placeholder=''"></textarea>
+    <div class="container">your email</div>    
+    <input type="email" name="email" id="email">
+    <input type="submit" value="Send">
+    <% if (messageSent) { %>
+      <div class="container" style="color: greenyellow;"><%= messageSent %></div> 
+    <% } %>
+  </div>
+</form>
+  </div>
+
+
+<%- include('partials/footer.ejs') %>
