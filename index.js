@@ -17,7 +17,7 @@ app.get('/', (req, res) => {
     notes: notes,
   }
   res.render('index.ejs', {...data})
-})
+});
 
 app.post('/post', (req, res) => {
   const post = req.body.blogPost?.trim();
@@ -25,19 +25,19 @@ app.post('/post', (req, res) => {
     notes.push(post);
   };
   res.redirect('/');
-})
+});
 
 app.post('/clear', (req, res) => {
   notes = []
   res.redirect('/');
-})
+});
 
 app.get('/notes', (req, res) => {
     const data = {
     notes: notes,
   }
   res.render('notes.ejs', {...data})
-})
+});
 
 app.post('/delete', (req, res) => { // para escolher um index de um array (lista) e eliminar. Util para to-dos.
   const indexToDelete = parseInt(req.body.index);
