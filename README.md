@@ -1,4 +1,4 @@
-# Back-end design
+# Frontend + backend design
 
-## Escriba: to-do list app
-<a href="https://github.com/samarog/Capstone-3/blob/main/index.js">Routes</a>
+## Escriba | Your personal to-do list:
+<a href="https://escriba.onrender.com/">App</a>
