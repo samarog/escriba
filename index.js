@@ -1,5 +1,9 @@
 import express from "express";
 import bodyParser from "body-parser";
+import nodemailer from 'nodemailer';
+import dotenv from "dotenv";
+
+dotenv.config({ path: '.env' })
 
 const app = express();
 const port = 3000;
@@ -56,9 +60,33 @@ app.get('/contact', (req, res) => {
   res.render('contact.ejs', { messageSent: showMessage ? 'Message sent.' : '' });
 });
 
-app.post('/sendmail', (req, res) => {
+app.post('/sendmail', async (req, res) => {
   console.log(req.body);
-  res.redirect('/contact?message=sent');
+  console.log('EMAIL:', process.env.MY_EMAIL);
+  console.log('PASS:', process.env.MY_AUTH);
+  
+  const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.MY_EMAIL ,
+    pass: process.env.MY_AUTH,
+  },
+});
+
+  const mailOptions = {
+    from: `"${req.body.email}" <${process.env.MY_EMAIL}>`,
+    to: process.env.MY_EMAIL, 
+    subject: 'New Message from Escriba',
+    text: req.body.message
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    res.redirect('/contact?message=sent');
+  } catch (err) {
+    console.error('Email failed:', err);
+    res.status(500).send("Failed to send email.");
+  }
 });
 
 app.listen(port, () => {
