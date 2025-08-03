@@ -14,24 +14,31 @@
   
 <div class="log"> <h4>My notes:</h4>
 <% if (notes && notes.length > 0) { %>
-    <ul>
-      <% notes.forEach((note, i) => { %>
-        <li>
-          <form action="/delete" method="POST" style="display: inline;">
-            <input type="hidden" name="index" value="<%= i %>">
-            <button type="submit" style="background: none; border: none; color: inherit; cursor: pointer;">
-              <%= note %>
-            </button>
-          </form>
-        </li>
-      <% }) %>
-    </ul>
-  <% } %>
+  <ul>
+    <% notes.forEach((note, i) => { %>
+      <li class="note-item">
+        <form action="/delete" method="POST" class="note-form" data-note-index="<%= i %>">
+          <input type="hidden" name="index" value="<%= i %>">
+          <button type="submit" class="note-button">
+            <%= note %>
+          </button>
+        </form>
+      </li>
+    <% }) %>
+  </ul>
+  <% } else { %>
+    <p class="nonote"> No notes yet. </p>
+  <% } %> 
   <form action="/clear" method="POST" class="clear">
   <input type="submit" value="Clear">
 </form>
+<br>
+
+<h4>My motto:</h4>
+  <div class="quote-container">
+    '<%= message %>' &mdash; <span><%= author %></span>
+    </div>
+
 </div>
-
-
 
 <%- include('partials/footer.ejs') %>
