@@ -105,7 +105,7 @@ The app will be available at `http://localhost:3000`.
 
 ## UI Preview
 
-*!/(https://i.ibb.co/LzH18FWm/preview.png)*
+![escriba](https://i.ibb.co/LzH18FWm/preview.png)
 
 ---
 
