@@ -78,8 +78,12 @@ h1 {
 }
 
 #txt::placeholder {
-  color: #555; /* or 'wheat' if you want it consistent */
-  opacity: 1;  /* ensure it's fully visible */
+  color: #555;
+  opacity: 1;
+}
+
+h4 {
+  margin-top: 5%;
 }
 
 input {
@@ -132,11 +136,32 @@ input#email{
   padding: 2rem;
 }
 
+.nonote {
+  margin-bottom: 0;
+  font-style: normal;
+  opacity: 0.6;
+}
+
+.quote-container {
+  color: wheat;
+  margin-top: 10px;
+}
+
 .makepost,
 .log {
   flex: 1;
   flex-direction: column;
   text-align: start;
+}
+
+.note-item {
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.note-item.fadeout {
+  opacity: 0;
+  transform: translateY(-10px);
+  pointer-events: none;
 }
 
 button {
@@ -184,4 +209,3 @@ footer {
   justify-content: flex-end;
 }
 }
-

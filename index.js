@@ -2,6 +2,7 @@ import express from "express";
 import bodyParser from "body-parser";
 import nodemailer from 'nodemailer';
 import dotenv from "dotenv";
+import axios from "axios";
 
 dotenv.config({ path: '.env' })
 
@@ -12,11 +13,25 @@ let notes = [];
 app.use(express.static('public'));
 app.use(bodyParser.urlencoded({extended: true}));
 
-app.get('/', (req, res) => {
+app.get('/', async (req, res) => {
   const data = {
     notes: notes,
-  }
-  res.render('index.ejs', {...data})
+  };
+try {
+   const quote = await axios.get("https://zenquotes.io/api/today");
+   const fullQuote = {
+    message: quote.data[0].q,
+    author: quote.data[0].a
+   }
+   res.render('index.ejs', {...data, ...fullQuote})
+} catch (error) {
+  res.render("index.ejs", {
+    notes: notes,
+    message: "Failed to load quote.",
+    author: "Oops",
+    content: JSON.stringify(error)
+  });
+}
 });
 
 app.post('/post', (req, res) => {
