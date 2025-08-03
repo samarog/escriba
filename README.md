@@ -16,7 +16,8 @@ Escriba is a lightweight, Express-based web application for writing, saving, and
 - **Clear All:** Wipe all saved notes with one action.
 - **Contact Form:** Submit a message and email address to the site owner.
 - **Email Delivery:** Messages sent through Gmail via Nodemailer.
-- **Custom Styling:** Stylish dark background, clear typography, responsive layout.
+- **Sleek Styling:** Dark filtered background, clear typography, responsive layout.
+- **Dynamic BG** Dynamic background images via Lorem Picsum.
 - **Secure Config:** Email credentials handled through environment variables.
 
 ---
