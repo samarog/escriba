@@ -28,7 +28,7 @@ app.get("/", async (req, res) => {
     res.render("index.ejs", {
       notes: notes,
       message: "Failed to load quote.",
-      author: "Oops",
+      author: "Sorry",
       content: JSON.stringify(error),
     });
   }
@@ -54,8 +54,7 @@ app.get("/notes", (req, res) => {
   res.render("notes.ejs", { ...data });
 });
 
-app.post("/delete", (req, res) => {
-  // para escolher um index de um array (lista) e eliminar. Util para to-dos.
+app.post("/delete", (req, res) => { // para escolher um index de um array (lista) e eliminar. Util para to-dos.
   const indexToDelete = parseInt(req.body.index);
   if (!isNaN(indexToDelete)) {
     notes.splice(indexToDelete, 1);
@@ -63,8 +62,7 @@ app.post("/delete", (req, res) => {
   res.redirect("/");
 });
 
-app.post("/notes/delete", (req, res) => {
-  // para escolher um index de um array (lista) e eliminar. Util para to-dos.
+app.post("/notes/delete", (req, res) => { // para escolher um index de um array (lista) e eliminar. Util para to-dos.
   const indexToDelete = parseInt(req.body.index);
   if (!isNaN(indexToDelete)) {
     notes.splice(indexToDelete, 1);
