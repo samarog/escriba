@@ -112,4 +112,4 @@ The app will be available at `http://localhost:3000`.
 
 ## License
 
-© Gonçalo Amaro
+MIT / Gonçalo Amaro
