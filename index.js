@@ -5,10 +5,9 @@ import axios from "axios";
 import { rateLimit } from "express-rate-limit";
 import morgan from "morgan";
 
-dotenv.config({ path: ".env" });
-
 const app = express();
 const port = 3000;
+const mailLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 10 });
 let notes = [];
 let posts = [
   {
@@ -21,7 +20,6 @@ let posts = [
   },
 ];
 let lastId = 1;
-const mailLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 10 });
 
 // middleware
 
@@ -29,6 +27,7 @@ app.use(express.static("public"));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(morgan("dev"));
+dotenv.config({ path: ".env" });
 
 // Entry route
 

@@ -1,11 +1,12 @@
 {
-  "name": "capstone-3-microblog",
-  "version": "1.0.0",
-  "description": "a simple microblog made from scratch",
+  "name": "escriba",
+  "version": "1.4.1",
+  "description": "Express microblog with EJS and mailer",
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.js",
+    "dev": "nodemon index.js"
   },
   "keywords": [
     "microblog"
@@ -21,5 +22,8 @@
     "express-rate-limit": "^8.0.1",
     "morgan": "^1.10.1",
     "nodemailer": "^7.0.5"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }

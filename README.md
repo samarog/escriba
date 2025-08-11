@@ -1,6 +1,6 @@
 # Escriba
 
-Escriba is a lightweight, Express-based web application for writing, saving, and deleting short notes. It also includes a built-in contact form that sends email messages using Nodemailer. Styled with a dark UI theme and responsive layout, Escriba is a sleek tool for personal note-taking and communication.
+Escriba is a lightweight, Express-based web application for writing, saving, and deleting short notes and publishing blog posts. It also includes a built-in contact form that sends email messages using Nodemailer. Styled with a dark UI theme and responsive layout, Escriba is a sleek tool for personal note-taking and communication.
 
 ---
 
@@ -15,6 +15,7 @@ Escriba is a lightweight, Express-based web application for writing, saving, and
 - **Note Logging:** Add, view, and delete personal notes.
 - **Clear All:** Wipe all saved notes with one action.
 - **Contact Form:** Submit a message and email address to the site owner.
+- **Microblog:** Create view, and delete author blog posts.
 - **Email Delivery:** Messages sent through Gmail via Nodemailer.
 - **Sleek Styling:** Dark filtered background, clear typography, responsive layout.
 - **Dynamic BG** Dynamic background images via Lorem Picsum.
@@ -26,7 +27,7 @@ Escriba is a lightweight, Express-based web application for writing, saving, and
 
 ### 1. **Clone the Repository**
 ```bash
-git clone https://github.com/yourusername/escriba.git
+git clone https://github.com/samarog/escriba.git
 cd escriba
 ```
 
@@ -64,7 +65,32 @@ The app will be available at `http://localhost:3000`.
 - **Frontend:** EJS templates, Bootstrap, FontAwesome
 - **Email:** Nodemailer (via Gmail SMTP)
 - **Styling:** Custom CSS (`main.css`)
-- **Data Handling:** In-memory storage (notes stored in array)
+- **Data Handling:** In-memory storage (notes and blog posts stored in array)
+
+---
+
+## Routes
+
+### Pages
+> GET / – Home (notes + quote)
+> GET /notes – Notes view
+> GET /contact – Contact form (supports ?message=sent)
+> GET /blog – Blog list + new post form
+
+### Notes
+> POST /post – Add note (notepost)
+> POST /delete – Delete note by index
+> POST /notes/delete – Delete note by index (notes page)
+> POST /clear – Clear all notes
+
+### Blog
+> POST /blogpost – Create blog post
+>> Body: title, content, author
+> POST /blog/delete – Delete blog post
+>> Body: id (hidden input in the form)
+
+### Mail
+> POST /sendmail – Sends email to MY_EMAIL (rate limited)
 
 ---
 
@@ -93,6 +119,7 @@ The app will be available at `http://localhost:3000`.
 - Add a note from the homepage and submit it.
 - Click a note to delete it individually.
 - Use "Clear" to remove all notes.
+- Create a microblog and read it later.
 - Visit the **Contact** page to send me an email.
 
 ---
