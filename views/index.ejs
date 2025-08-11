@@ -1,44 +1,52 @@
 <%- include('partials/header.ejs') %>
 
-  <div class="stacker">
-
+<div class="stacker">
   <div class="makepost">
-      <h1> ‿escriba </h1>
-<form action="/post" method="POST" class="makepost">
-  <div class="input-stack">
-    <textarea name="blogPost" id="txt" placeholder="Dentist appointment on Thursday..." onclick="this.placeholder=''"></textarea>
-    <input type="submit" value="Post">
+    <h1>‿escriba</h1>
+    <form action="/post" method="POST" class="makepost">
+      <div class="input-stack">
+        <textarea
+          name="notepost"
+          id="txt"
+          placeholder="Dentist appointment on Thursday..."
+          onclick="this.placeholder=''"
+        ></textarea>
+        <input type="submit" value="Post" />
+      </div>
+    </form>
   </div>
-</form>
-  </div>
-  
-<div class="log"> <h4>Don't forget:</h4>
-<% if (notes && notes.length > 0) { %>
-  <ul>
-    <% notes.forEach((note, i) => { %>
+
+  <div class="log">
+    <h4>Don't forget:</h4>
+    <% if (notes && notes.length > 0) { %>
+    <ul>
+      <% notes.forEach((note, i) => { %>
       <li class="note-item">
-        <form action="/delete" method="POST" class="note-form" data-note-index="<%= i %>">
-          <input type="hidden" name="index" value="<%= i %>">
-          <button type="submit" class="note-button">
-            <%= note %>
-          </button>
+        <form
+          action="/delete"
+          method="POST"
+          class="note-form"
+          data-note-index="<%= i %>"
+        >
+          <input type="hidden" name="index" value="<%= i %>" />
+          <button type="submit" class="note-button"><%= note %></button>
         </form>
       </li>
-    <% }) %>
-  </ul>
-  <% } else { %>
-    <p class="nonote"> No notes yet. </p>
-  <% } %> 
-  <form action="/clear" method="POST" class="clear">
-  <input type="submit" value="Clear">
-</form>
-<br>
+      <% }) %>
+    </ul>
+    <% } else { %>
+    <p class="nonote">No notes yet.</p>
+    <% } %>
+    <form action="/clear" method="POST" class="clear">
+      <input type="submit" value="Clear" />
+    </form>
+    <br />
 
-<h4>Showerthought:</h4>
-  <div class="quote-container">
-    '<%= message %>' &mdash; <span><%= author %></span>
+    <h4>Showerthought:</h4>
+    <div class="quote-container">
+      '<%= message %>' &mdash; <span><%= author %></span>
     </div>
+  </div>
 
+  <%- include('partials/footer.ejs') %>
 </div>
-
-<%- include('partials/footer.ejs') %>

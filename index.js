@@ -1,17 +1,36 @@
 import express from "express";
-import bodyParser from "body-parser";
 import nodemailer from "nodemailer";
 import dotenv from "dotenv";
 import axios from "axios";
+import { rateLimit } from "express-rate-limit";
+import morgan from "morgan";
 
 dotenv.config({ path: ".env" });
 
 const app = express();
 const port = 3000;
 let notes = [];
+let posts = [
+  {
+    id: 1,
+    title: "Sustainable living: Tips for an eco-friendly lifestyle",
+    content:
+      "Sustainability is more than just a buzzword; it's a way of life. As the effects of climate change become more pronounced, there's a growing realization about the need to live sustainably. From reducing waste and conserving energy to supporting eco-friendly products, there are numerous ways we can make our daily lives more environmentally friendly. This post will explore practical tips and habits that can make a significant difference.",
+    author: "Gonçalo Amaro",
+    date: "2025-08-07",
+  },
+];
+let lastId = 1;
+const mailLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 10 });
+
+// middleware
 
 app.use(express.static("public"));
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(morgan("dev"));
+
+// Entry route
 
 app.get("/", async (req, res) => {
   const data = {
@@ -34,8 +53,10 @@ app.get("/", async (req, res) => {
   }
 });
 
+// Todo routes
+
 app.post("/post", (req, res) => {
-  const post = req.body.blogPost?.trim();
+  const post = req.body.notepost?.trim();
   if (post) {
     notes.push(post);
   }
@@ -54,7 +75,8 @@ app.get("/notes", (req, res) => {
   res.render("notes.ejs", { ...data });
 });
 
-app.post("/delete", (req, res) => { // para escolher um index de um array (lista) e eliminar. Util para to-dos.
+app.post("/delete", (req, res) => {
+  // para escolher um index de um array (lista) e eliminar. Util para to-dos.
   const indexToDelete = parseInt(req.body.index);
   if (!isNaN(indexToDelete)) {
     notes.splice(indexToDelete, 1);
@@ -62,7 +84,8 @@ app.post("/delete", (req, res) => { // para escolher um index de um array (lista
   res.redirect("/");
 });
 
-app.post("/notes/delete", (req, res) => { // para escolher um index de um array (lista) e eliminar. Util para to-dos.
+app.post("/notes/delete", (req, res) => {
+  // para escolher um index de um array (lista) e eliminar. Util para to-dos.
   const indexToDelete = parseInt(req.body.index);
   if (!isNaN(indexToDelete)) {
     notes.splice(indexToDelete, 1);
@@ -77,7 +100,9 @@ app.get("/contact", (req, res) => {
   });
 });
 
-app.post('/sendmail', async (req, res) => { 
+// Mail routes (+rate limiter)
+
+app.post("/sendmail", mailLimiter, async (req, res) => {
   const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
@@ -88,6 +113,7 @@ app.post('/sendmail', async (req, res) => {
 
   const mailOptions = {
     from: `"${req.body.email}" <${process.env.MY_EMAIL}>`,
+    replyTo: req.body.email,
     to: process.env.MY_EMAIL,
     subject: "New Message from Escriba",
     text: req.body.message,
@@ -102,6 +128,54 @@ app.post('/sendmail', async (req, res) => {
   }
 });
 
+// blog routes
+
+app.get("/blog", (req, res) => {
+  res.render("blog.ejs", { posts });
+});
+
+app.post("/blogpost", (req, res) => {
+  const { title, content, author } = req.body;
+
+  if (!title?.trim() || !content?.trim()) {
+    // lembra-te do operador '?' para evitar curto-circuito.
+    return res.status(400).send("Title/content required.");
+  }
+
+  lastId++;
+  const newPost = {
+    id: lastId,
+    title: req.body.title,
+    content: req.body.content,
+    author: req.body.author || "Anonymous",
+  };
+
+  posts.push(newPost);
+  res.redirect("/blog");
+});
+
+app.post("/blog/delete", (req, res) => {
+  const findPostByIndex = posts.findIndex(
+    (p) => p.id === parseInt(req.body.id)
+  );
+  if (findPostByIndex === -1)
+    return res.status(404).json({ error: "Error. Couldn't delete." });
+  posts.splice(findPostByIndex, 1);
+  res.redirect("/blog");
+});
+
+// 404 HANDLER
+app.use((req, res) => {
+  res.status(404).send("Not found");
+});
+
+// GENERAL ERR HANDLER
+app.use((err, req, res, next) => {
+  console.error(err.stack || err);
+  res.status(500).send("Something broke");
+});
+
+// SERVER START
 app.listen(port, () => {
   console.log("Running on port: " + port);
 });
