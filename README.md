@@ -86,6 +86,7 @@ The app will be available at `http://localhost:3000`.
 ### Blog
 > POST /blogpost – Create blog post
 >> Body: title, content, author
+
 > POST /blog/delete – Delete blog post
 >> Body: id (hidden input in the form)
 
@@ -101,6 +102,7 @@ The app will be available at `http://localhost:3000`.
 ├── views/
 │   ├── index.ejs         # Main page with notes
 │   ├── notes.ejs         # Alternate view for notes
+│   ├── blog.ejs          # Microblog
 │   ├── contact.ejs       # Contact form
 │   └── partials/
 │       ├── header.ejs    # Header/nav with links
