@@ -77,11 +77,7 @@ app.get("/contact", (req, res) => {
   });
 });
 
-app.post('/sendmail', async (req, res) => {
-  console.log(req.body);
-  console.log('EMAIL:', process.env.MY_EMAIL);
-  console.log('PASS:', process.env.MY_AUTH);
-  
+app.post('/sendmail', async (req, res) => { 
   const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
