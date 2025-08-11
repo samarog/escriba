@@ -1,0 +1,56 @@
+<%- include('partials/header.ejs') %>
+
+<h4><i class="fa fa-align-left px-2"></i>My blog:</h4>
+
+<div class="blog-mobile">
+  <div class="stacker" style="padding: 0">
+    <form action="/blogpost" method="POST" class="makepost parent">
+      <!-- textarea -->
+      <textarea
+        class="div1"
+        name="content"
+        id="txt2"
+        placeholder="My thoughts on how failure shapes success..."
+        onclick="this.placeholder=''"
+        required
+      ></textarea>
+
+      <!-- titoli -->
+      <input
+        class="div2"
+        type="text"
+        name="title"
+        placeholder="Enter post title..."
+        required
+      />
+
+      <!-- author -->
+      <input
+        class="div4"
+        type="text"
+        name="author"
+        placeholder="Author name..."
+      />
+
+      <!-- submit -->
+      <input class="div3" type="submit" value="Publish Post" />
+    </form>
+  </div>
+</div>
+
+<div class="blog-log">
+  <% posts.forEach(i => { %>
+  <div class="blog-post">
+    <p class="blogtitle"><%= i.title %></p>
+    <p class="blogcontent"><%= i.content %></p>
+    <p class="blogauthor">By <%= i.author %></p>
+    <p class="blogdate"><%= i.date %></p>
+    <form action="/blog/delete" method="POST" style="display: inline">
+      <input type="hidden" name="id" value="<%= i.id %>" />
+      <button class="delete-post">X</button>
+    </form>
+  </div>
+  <% }) %>
+</div>
+
+<%- include('partials/footer.ejs') %>
