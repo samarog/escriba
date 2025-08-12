@@ -44,7 +44,7 @@
     <p class="blogcontent"><%= i.content %></p>
     <p class="blogauthor">By <%= i.author %></p>
     <p class="blogdate"><%= i.date %></p>
-    <form action="/blog/delete" method="POST" style="display: inline">
+    <form action="/blogpost/delete" method="POST" style="display: inline">
       <input type="hidden" name="id" value="<%= i.id %>" />
       <button class="delete-post">X</button>
     </form>
