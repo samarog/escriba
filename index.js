@@ -8,6 +8,7 @@ import morgan from "morgan";
 const app = express();
 const port = 3000;
 const mailLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 10 });
+const today = new Date().toISOString().split("T")[0];
 let notes = [];
 let posts = [
   {
@@ -147,6 +148,7 @@ app.post("/blogpost", (req, res) => {
     title: req.body.title,
     content: req.body.content,
     author: req.body.author || "Anonymous",
+    date: today || "Timeless",
   };
 
   posts.unshift(newPost);
