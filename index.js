@@ -149,11 +149,11 @@ app.post("/blogpost", (req, res) => {
     author: req.body.author || "Anonymous",
   };
 
-  posts.push(newPost);
+  posts.unshift(newPost);
   res.redirect("/blog");
 });
 
-app.post("/blog/delete", (req, res) => {
+app.post("/blogpost/delete", (req, res) => {
   const findPostByIndex = posts.findIndex(
     (p) => p.id === parseInt(req.body.id)
   );
