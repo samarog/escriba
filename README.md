@@ -8,6 +8,8 @@ Escriba is a lightweight, Express-based web application for writing, saving, and
 
 *https://escriba.onrender.com/*
 
+![CI](https://github.com/samarog/escriba/actions/workflows/ci.yml/badge.svg)
+
 ---
 
 ## Features

@@ -6,7 +6,6 @@ import { rateLimit } from "express-rate-limit";
 import morgan from "morgan";
 
 const app = express();
-const port = 3000;
 const mailLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 10 });
 const today = new Date().toISOString().split("T")[0];
 let notes = [];
@@ -165,6 +164,10 @@ app.post("/blogpost/delete", (req, res) => {
   res.redirect("/blog");
 });
 
+// Jest
+
+app.get("/health", (req, res) => res.status(200).json({ ok: true }));
+
 // 404 HANDLER
 app.use((req, res) => {
   res.status(404).send("Not found");
@@ -176,7 +179,4 @@ app.use((err, req, res, next) => {
   res.status(500).send("Something broke");
 });
 
-// SERVER START
-app.listen(port, () => {
-  console.log("Running on port: " + port);
-});
+export default app;
