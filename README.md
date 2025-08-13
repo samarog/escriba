@@ -74,22 +74,28 @@ The app will be available at `http://localhost:3000`.
 ## Routes
 
 ### Pages
-> GET / – Home (notes + quote)
-> GET /notes – Notes view
-> GET /contact – Contact form (supports ?message=sent)
-> GET /blog – Blog list + new post form
+> GET / » Home (notes + quote)
+
+> GET /notes » Notes view
+
+> GET /contact » Contact form (supports ?message=sent)
+
+> GET /blog » Blog list + new post form
 
 ### Notes
-> POST /post – Add note (notepost)
-> POST /delete – Delete note by index
-> POST /notes/delete – Delete note by index (notes page)
-> POST /clear – Clear all notes
+> POST /post » Add note (notepost)
+
+> POST /delete » Delete note by index
+
+> POST /notes/delete » Delete note by index (notes page)
+
+> POST /clear » Clear all notes
 
 ### Blog
-> POST /blogpost – Create blog post
+> POST /blogpost » Create blog post
 >> Body: title, content, author
 
-> POST /blog/delete – Delete blog post
+> POST /blog/delete » Delete blog post
 >> Body: id (hidden input in the form)
 
 ### Mail
