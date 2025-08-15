@@ -44,6 +44,29 @@ const db = new Pool({
 
 db.connect();
 
+// db testing
+
+// quick connectivity check on startup (optional but helpful)
+export async function verifyDbConnection() {
+  const client = await pool.connect();
+  try {
+    await client.query('SELECT 1');
+    console.log('✅ DB connection OK');
+  } finally {
+    client.release();
+  }
+}
+
+// Example route that actually touches the DB
+app.get('/healthz', async (_req, res) => {
+  try {
+    const { rows } = await pool.query('SELECT NOW() as now');
+    res.json({ ok: true, now: rows[0].now });
+  } catch (e) {
+    res.status(500).json({ ok: false, error: e.message });
+  }
+});
+
 // Entry route
 
 app.get("/", async (req, res) => {
@@ -200,4 +223,5 @@ app.use((err, req, res, next) => {
   res.status(500).send("Something broke");
 });
 
+export { pool };
 export default app;
