@@ -41,6 +41,7 @@ const db = new pg.Client({
 
 db.connect();
 
+console.log(db.user, db.host, db.database, db.port)
 // Entry route
 
 app.get("/", async (req, res) => {
