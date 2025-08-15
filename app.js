@@ -5,7 +5,6 @@ import axios from "axios";
 import { rateLimit } from "express-rate-limit";
 import morgan from "morgan";
 import pg from 'pg';
-import { Pool } from "pg";
 
 const app = express();
 const mailLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 10 });
@@ -32,40 +31,15 @@ dotenv.config({ path: ".env" });
 
 // postgres
 
-const db = new Pool({
-  connectionString: process.env.DATABASE_URL || undefined,
-  user: process.env.PGUSER,
-  host: process.env.PGHOST,
-  database: process.env.PGDATABASE,
-  password: process.env.PGPASSWORD,
-  port: Number(process.env.PGPORT || 5432),
-  ssl: { rejectUnauthorized: false },
+const db = new pg.Client({
+  user: process.env.PGUSER || "postgres",
+  host: process.env.PGHOST || "localhost",
+  database: process.env.PGDATABASE || "world",
+  password: process.env.PGPASSWORD || "*******",
+  port: Number(process.env.PGPORT) || 5432,
 });
 
 db.connect();
-
-// db testing
-
-// quick connectivity check on startup (optional but helpful)
-export async function verifyDbConnection() {
-  const client = await pool.connect();
-  try {
-    await client.query('SELECT 1');
-    console.log('✅ DB connection OK');
-  } finally {
-    client.release();
-  }
-}
-
-// Example route that actually touches the DB
-app.get('/healthz', async (_req, res) => {
-  try {
-    const { rows } = await pool.query('SELECT NOW() as now');
-    res.json({ ok: true, now: rows[0].now });
-  } catch (e) {
-    res.status(500).json({ ok: false, error: e.message });
-  }
-});
 
 // Entry route
 
@@ -223,5 +197,4 @@ app.use((err, req, res, next) => {
   res.status(500).send("Something broke");
 });
 
-export { db };
 export default app;
