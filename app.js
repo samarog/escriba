@@ -1,10 +1,11 @@
 import express from "express";
-import nodemailer from "nodemailer";
 import dotenv from "dotenv";
+import nodemailer from "nodemailer";
 import axios from "axios";
 import { rateLimit } from "express-rate-limit";
 import morgan from "morgan";
 import pg from 'pg';
+import { Pool } from "pg";
 
 const app = express();
 const mailLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 10 });
@@ -31,12 +32,14 @@ dotenv.config({ path: ".env" });
 
 // postgres
 
-const db = new pg.Client({
+const db = new Pool({
+  connectionString: process.env.DATABASE_URL || undefined,
   user: process.env.PGUSER,
   host: process.env.PGHOST,
   database: process.env.PGDATABASE,
   password: process.env.PGPASSWORD,
-  port: Number(process.env.PGPORT)
+  port: Number(process.env.PGPORT || 5432),
+  ssl: { rejectUnauthorized: false },
 });
 
 db.connect();
