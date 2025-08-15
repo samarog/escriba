@@ -7,6 +7,7 @@ import morgan from "morgan";
 import pg from 'pg';
 
 const app = express();
+const { Pool } = pg;
 const mailLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 10 });
 const today = new Date().toISOString().split("T")[0];
 let posts = [
@@ -31,15 +32,16 @@ dotenv.config({ path: ".env" });
 
 // postgres
 
-const db = new pg.Client({
-  user: process.env.PGUSER || "postgres",
-  host: process.env.PGHOST || "localhost",
-  database: process.env.PGDATABASE || "world",
-  password: process.env.PGPASSWORD || "*******",
-  port: Number(process.env.PGPORT) || 5432,
+const db = new Pool({
+  connectionString: process.env.DATABASE_URL,           // internal URL from Render
+  ssl: { rejectUnauthorized: false },                   // or use CA + verify-full if provided
 });
 
-db.connect();
+db.query('SELECT 1').then(() => {
+  console.log('✅ DB reachable');
+}).catch(e => {
+  console.error('❌ DB connection failed:', e.message);
+});
 
 // Entry route
 
