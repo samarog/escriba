@@ -1,8 +1,14 @@
 // SERVER START
-import app from "./app.js";
+import 'dotenv/config';
+import app, { verifyDbConnection } from './app.js';
 
 const port = process.env.PORT || 3000;
 
-app.listen(port, () => {
-  console.log("Running on port: " + port);
+(async () => {
+  // fail fast if DB isn’t reachable from this service
+  await verifyDbConnection();
+  app.listen(port, () => console.log(`Running on port: ${port}`));
+})().catch((err) => {
+  console.error('Startup failed:', err);
+  process.exit(1);
 });
