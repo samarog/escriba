@@ -223,5 +223,5 @@ app.use((err, req, res, next) => {
   res.status(500).send("Something broke");
 });
 
-export { pool };
+export { db };
 export default app;
