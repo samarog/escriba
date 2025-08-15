@@ -1,13 +1,12 @@
 import express from "express";
-import dotenv from "dotenv";
 import nodemailer from "nodemailer";
+import dotenv from "dotenv";
 import axios from "axios";
 import { rateLimit } from "express-rate-limit";
 import morgan from "morgan";
 import pg from 'pg';
 
 const app = express();
-const { Pool } = pg;
 const mailLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 10 });
 const today = new Date().toISOString().split("T")[0];
 let posts = [
@@ -32,16 +31,15 @@ dotenv.config({ path: ".env" });
 
 // postgres
 
-const db = new Pool({
-  connectionString: process.env.DATABASE_URL,           // internal URL from Render
-  ssl: { rejectUnauthorized: false },                   // or use CA + verify-full if provided
+const db = new pg.Client({
+  user: process.env.PGUSER || "postgres",
+  host: process.env.PGHOST || "localhost",
+  database: process.env.PGDATABASE || "world",
+  password: process.env.PGPASSWORD || "samarog",
+  port: Number(process.env.PGPORT) || 5433,
 });
 
-db.query('SELECT 1').then(() => {
-  console.log('✅ DB reachable');
-}).catch(e => {
-  console.error('❌ DB connection failed:', e.message);
-});
+db.connect();
 
 // Entry route
 
