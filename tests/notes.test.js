@@ -1,7 +1,7 @@
 import { jest } from '@jest/globals';
 
 jest.unstable_mockModule('pg', async () => {
-  const m = await import('./pg-mock.test.js');
+  const m = await import('./pg.mock.js');
   return { __esModule: true, ...m, default: m.default };
 });
 
