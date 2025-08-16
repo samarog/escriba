@@ -1,5 +1,6 @@
 import request from "supertest";
 import app from "../app.js";
+jest.mock('pg', () => require('./pg.mock.js'));
 
 it('should return 200 and a Clear & LEave button', async  () => {
   const res = await request(app).get('/notes');
