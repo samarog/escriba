@@ -12,15 +12,15 @@
 </form>
   </div>
   
-<div class="log"> <h4>Showerthought:</h4>
+<div class="log"> <h4>Don't forget:</h4>
 <% if (notes && notes.length > 0) { %>
   <ul>
     <% notes.forEach((note, i) => { %>
       <li class="note-item">
         <form action="/delete" method="POST" class="note-form" data-note-index="<%= i %>">
-          <input type="hidden" name="index" value="<%= i %>">
+          <input type="hidden" name="id" value="<%= note.id %>">
           <button type="submit" class="note-button">
-            <%= note %>
+            <%= note.title %>
           </button>
         </form>
       </li>
@@ -34,7 +34,7 @@
 </form>
 <br />
 
-<h4>My motto:</h4>
+<h4>Showerthought:</h4>
   <div class="quote-container">
     '<%= message %>' &mdash; <span><%= author %></span>
     </div>

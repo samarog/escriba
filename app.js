@@ -1,14 +1,16 @@
 import express from "express";
-import nodemailer from "nodemailer";
 import dotenv from "dotenv";
+import nodemailer from "nodemailer";
 import axios from "axios";
 import { rateLimit } from "express-rate-limit";
 import morgan from "morgan";
+import pg from 'pg';
+
+// variables
 
 const app = express();
 const mailLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 10 });
 const today = new Date().toISOString().split("T")[0];
-let notes = [];
 let posts = [
   {
     id: 1,
@@ -29,19 +31,31 @@ app.use(express.json());
 app.use(morgan("dev"));
 dotenv.config({ path: ".env" });
 
-// Entry route
+// postgres
+
+const db = new pg.Client({
+  user: process.env.PGUSER,
+  host: process.env.PGHOST,
+  database: process.env.PGDATABASE,
+  password: process.env.PGPASSWORD,
+  port: Number(process.env.PGPORT),
+});
+
+db.connect();
+
+// root
 
 app.get("/", async (req, res) => {
-  const data = {
-    notes: notes,
-  };
+  const { rows } = await db.query("SELECT * FROM escriba_notes");
+  const notes = rows
+  console.log(notes)
   try {
     const quote = await axios.get("https://zenquotes.io/api/today");
     const fullQuote = {
       message: quote.data[0].q,
       author: quote.data[0].a,
     };
-    res.render("index.ejs", { ...data, ...fullQuote });
+    res.render("index.ejs", { notes, ...fullQuote });
   } catch (error) {
     res.render("index.ejs", {
       notes: notes,
@@ -52,44 +66,19 @@ app.get("/", async (req, res) => {
   }
 });
 
-// Todo routes
+// GET routes
 
-app.post("/post", (req, res) => {
-  const post = req.body.notepost?.trim();
-  if (post) {
-    notes.push(post);
+app.get("/notes", async (req, res) => {
+  try {
+    const { rows } = await db.query("SELECT * FROM escriba_notes");
+    const notes = rows;
+    res.render("notes.ejs", { notes });
+  } catch (error) {
+    res.render("notes.ejs", {
+      notes: notes,
+      content: JSON.stringify(error),
+    });
   }
-  res.redirect("/");
-});
-
-app.post("/clear", (req, res) => {
-  notes = [];
-  res.redirect("/");
-});
-
-app.get("/notes", (req, res) => {
-  const data = {
-    notes: notes,
-  };
-  res.render("notes.ejs", { ...data });
-});
-
-app.post("/delete", (req, res) => {
-  // para escolher um index de um array (lista) e eliminar. Util para to-dos.
-  const indexToDelete = parseInt(req.body.index);
-  if (!isNaN(indexToDelete)) {
-    notes.splice(indexToDelete, 1);
-  }
-  res.redirect("/");
-});
-
-app.post("/notes/delete", (req, res) => {
-  // para escolher um index de um array (lista) e eliminar. Util para to-dos.
-  const indexToDelete = parseInt(req.body.index);
-  if (!isNaN(indexToDelete)) {
-    notes.splice(indexToDelete, 1);
-  }
-  res.redirect("/notes");
 });
 
 app.get("/contact", (req, res) => {
@@ -99,38 +88,39 @@ app.get("/contact", (req, res) => {
   });
 });
 
-// Mail routes (+rate limiter)
-
-app.post("/sendmail", mailLimiter, async (req, res) => {
-  const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-      user: process.env.MY_EMAIL,
-      pass: process.env.MY_AUTH,
-    },
-  });
-
-  const mailOptions = {
-    from: `"${req.body.email}" <${process.env.MY_EMAIL}>`,
-    replyTo: req.body.email,
-    to: process.env.MY_EMAIL,
-    subject: "New Message from Escriba",
-    text: req.body.message,
-  };
-
-  try {
-    await transporter.sendMail(mailOptions);
-    res.redirect("/contact?message=sent");
-  } catch (err) {
-    console.error("Email failed:", err);
-    res.status(500).send("Failed to send email.");
-  }
-});
-
-// blog routes
-
 app.get("/blog", (req, res) => {
   res.render("blog.ejs", { posts });
+});
+
+// POST routes
+
+app.post("/post", async (req, res) => {
+  const post = req.body.notepost?.trim();
+  if (post) {
+  const result = await db.query('INSERT INTO escriba_notes (title) VALUES ($1)',[post]) 
+  }
+  res.redirect("/");
+});
+
+app.post("/clear", async (req, res) => {
+    const result = await db.query('DELETE FROM escriba_notes')
+  res.redirect("/");
+});
+
+app.post("/delete", async (req, res) => {
+  const idToDelete = parseInt(req.body.id);
+  if (!isNaN(idToDelete)) {
+  const result = await db.query('DELETE FROM escriba_notes WHERE id = $1', [idToDelete])
+    }
+  res.redirect("/");
+});
+
+app.post("/notes/delete", async (req, res) => {
+  const idToDelete = parseInt(req.body.id);
+  if (!isNaN(idToDelete)) {
+  const result = await db.query('DELETE FROM escriba_notes WHERE id = $1', [idToDelete])
+    }
+  res.redirect("/notes");
 });
 
 app.post("/blogpost", (req, res) => {
@@ -164,16 +154,44 @@ app.post("/blogpost/delete", (req, res) => {
   res.redirect("/blog");
 });
 
+// Mail routes (+rate limiter)
+
+app.post("/sendmail", mailLimiter, async (req, res) => {
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.MY_EMAIL,
+      pass: process.env.MY_AUTH,
+    },
+  });
+
+  const mailOptions = {
+    from: `"${req.body.email}" <${process.env.MY_EMAIL}>`,
+    replyTo: req.body.email,
+    to: process.env.MY_EMAIL,
+    subject: "New Message from Escriba",
+    text: req.body.message,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    res.redirect("/contact?message=sent");
+  } catch (err) {
+    console.error("Email failed:", err);
+    res.status(500).send("Failed to send email.");
+  }
+});
+
 // Jest
 
 app.get("/health", (req, res) => res.status(200).json({ ok: true }));
 
-// 404 HANDLER
+// error handlers
+
 app.use((req, res) => {
   res.status(404).send("Not found");
 });
 
-// GENERAL ERR HANDLER
 app.use((err, req, res, next) => {
   console.error(err.stack || err);
   res.status(500).send("Something broke");
