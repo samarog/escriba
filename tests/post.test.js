@@ -1,5 +1,6 @@
 import request from "supertest";
 import app from "../app.js";
+jest.mock('pg', () => require('./pg.mock.js'));
 
 it("adds a note and then sees it in /notes", async () => {
   const postRes = await request(app).post("/post").type("form").send({ notepost: "Hello World" });
