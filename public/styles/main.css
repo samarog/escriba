@@ -6,6 +6,7 @@ body {
   position: relative;
   z-index: 0;
   background: url("https://picsum.photos/1920/1080?grayscale&blur=2");
+  background-color: #444;
   font-family: "Didact Gothic";
   color: tomato;
 }
@@ -101,6 +102,11 @@ h1 {
 #txt2::placeholder {
   color: #555;
   opacity: 1;
+}
+
+.blog-container {
+  overflow-y: auto;
+  height: 100vh;
 }
 
 .blog-log {

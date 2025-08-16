@@ -34,11 +34,11 @@ dotenv.config({ path: ".env" });
 // postgres
 
 const db = new pg.Client({
-  user: process.env.PGUSER,
-  host: process.env.PGHOST,
-  database: process.env.PGDATABASE,
-  password: process.env.PGPASSWORD,
-  port: Number(process.env.PGPORT),
+  user: process.env.PGUSER || "postgres",
+  host: process.env.PGHOST || "localhost",
+  database: process.env.PGDATABASE || "permalist",
+  password: process.env.PGPASSWORD || "samarog",
+  port: Number(process.env.PGPORT) || 5433,
 });
 
 db.connect();
