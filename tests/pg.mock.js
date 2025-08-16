@@ -1,36 +1,37 @@
-const makeClient = () => {
-  const store = { notes: [] };
+// pg.mock.js
 
-  const client = {
-    connect: jest.fn().mockResolvedValue(),
-    end: jest.fn().mockResolvedValue(),
-    query: jest.fn((sql, params) => {
-      const q = String(sql);
+const store = { notes: [] }; // move store outside so we can reset it
 
-      // Very light, case-insensitive matching for your tests
-      if (/insert\s+into\s+notes/i.test(q)) {
-        const body = params?.[0] ?? params?.[1] ?? "";
-        const id = store.notes.length + 1;
-        store.notes.push({ id, body });
-        return Promise.resolve({ rows: [{ id, body }] });
-      }
+const makeClient = () => ({
+  connect: jest.fn().mockResolvedValue(),
+  end: jest.fn().mockResolvedValue(),
+  query: jest.fn((sql, params) => {
+    const q = String(sql).toLowerCase();
 
-      if (/select.*from\s+notes/i.test(q)) {
-        return Promise.resolve({ rows: store.notes });
-      }
+    if (q.includes('insert into notes')) {
+      const body = params?.[0] ?? params?.[1] ?? '';
+      const id = store.notes.length + 1;
+      store.notes.push({ id, body });
+      return Promise.resolve({ rows: [{ id, body }] });
+    }
 
-      // Fallback
-      return Promise.resolve({ rows: [] });
-    }),
-  };
+    if (q.includes('select') && q.includes('from notes')) {
+      return Promise.resolve({ rows: [...store.notes] });
+    }
 
-  return client;
-};
+    return Promise.resolve({ rows: [] });
+  }),
+});
 
 const client = makeClient();
 
 module.exports = {
-  // Support either Client or Pool usage
   Client: jest.fn(() => client),
   Pool: jest.fn(() => client),
+  __reset: () => {
+    store.notes = [];
+    client.query.mockClear();
+    client.connect.mockClear();
+    client.end.mockClear();
+  },
 };
