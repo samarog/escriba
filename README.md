@@ -149,6 +149,14 @@ The app will be available at `http://localhost:3000`.
 
 ---
 
+## Shout-out
+
+To [@mariodmpereira](https://github.com/mariodmpereira) for testing and reviewing this project.
+
+![Thanks!](https://img.shields.io/badge/Thanks-@mariodmpereira-blue.svg)
+
+---
+
 ## License
 
 MIT / Gonçalo Amaro
