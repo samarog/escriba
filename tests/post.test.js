@@ -2,11 +2,9 @@ import { jest } from '@jest/globals';
 
 jest.unstable_mockModule('pg', async () => {
   const m = await import('./pg.mock.js');
-  return m.default; // exports object from ESM
+  return { __esModule: true, ...m, default: m.default };
 });
-
-const { default: pgMock } = await import('./pg.mock.js');
-const { __reset } = pgMock;
+const { __reset } = await import('pg');
 const { default: app } = await import('../app.js');
 
 import request from 'supertest';
