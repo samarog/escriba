@@ -1,8 +1,11 @@
+<div class="blog-container">
 <%- include('partials/header.ejs') %>
+
 
 <h4><i class="fa fa-align-left px-2"></i>My blog:</h4>
 
-<div class="blog-mobile">
+
+  <div class="blog-mobile">
   <div class="stacker" style="padding: 0">
     <form action="/blogpost" method="POST" class="makepost parent">
       <!-- textarea -->
@@ -37,6 +40,7 @@
   </div>
 </div>
 
+
 <div class="blog-log">
   <% posts.forEach(i => { %>
   <div class="blog-post">
@@ -53,3 +57,4 @@
 </div>
 
 <%- include('partials/footer.ejs') %>
+</div>
