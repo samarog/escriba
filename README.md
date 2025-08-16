@@ -22,6 +22,7 @@ Escriba is a lightweight, Express-based web application for writing, saving, and
 - **Sleek Styling:** Dark filtered background, clear typography, responsive layout.
 - **Dynamic BG** Dynamic background images via Lorem Picsum.
 - **Secure Config:** Email credentials handled through environment variables.
+- **Database-backing:** Persistance ensured by Postgres database support.
 
 ---
 
