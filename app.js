@@ -1,10 +1,12 @@
 import express from "express";
-import nodemailer from "nodemailer";
 import dotenv from "dotenv";
+import nodemailer from "nodemailer";
 import axios from "axios";
 import { rateLimit } from "express-rate-limit";
 import morgan from "morgan";
 import pg from 'pg';
+
+// variables
 
 const app = express();
 const mailLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 10 });
@@ -41,8 +43,7 @@ const db = new pg.Client({
 
 db.connect();
 
-console.log(db.user, db.host, db.database, db.port)
-// Entry route
+// root
 
 app.get("/", async (req, res) => {
   const { rows } = await db.query("SELECT * FROM escriba_notes");
@@ -65,7 +66,33 @@ app.get("/", async (req, res) => {
   }
 });
 
-// Todo routes
+// GET routes
+
+app.get("/notes", async (req, res) => {
+  try {
+    const { rows } = await db.query("SELECT * FROM escriba_notes");
+    const notes = rows;
+    res.render("notes.ejs", { notes });
+  } catch (error) {
+    res.render("notes.ejs", {
+      notes: notes,
+      content: JSON.stringify(error),
+    });
+  }
+});
+
+app.get("/contact", (req, res) => {
+  const showMessage = req.query.message === "sent"; // check if message=success
+  res.render("contact.ejs", {
+    messageSent: showMessage ? "Message sent." : "",
+  });
+});
+
+app.get("/blog", (req, res) => {
+  res.render("blog.ejs", { posts });
+});
+
+// POST routes
 
 app.post("/post", async (req, res) => {
   const post = req.body.notepost?.trim();
@@ -77,22 +104,7 @@ app.post("/post", async (req, res) => {
 
 app.post("/clear", async (req, res) => {
     const result = await db.query('DELETE FROM escriba_notes')
-  
   res.redirect("/");
-});
-
-app.get("/notes", async (req, res) => {
-
-  try {
-    const { rows } = await db.query("SELECT * FROM escriba_notes");
-    const notes = rows;
-    res.render("notes.ejs", { notes });
-  } catch (error) {
-    res.render("notes.ejs", {
-      notes: notes,
-      content: JSON.stringify(error),
-    });
-  }
 });
 
 app.post("/delete", async (req, res) => {
@@ -109,47 +121,6 @@ app.post("/notes/delete", async (req, res) => {
   const result = await db.query('DELETE FROM escriba_notes WHERE id = $1', [idToDelete])
     }
   res.redirect("/notes");
-});
-
-app.get("/contact", (req, res) => {
-  const showMessage = req.query.message === "sent"; // check if message=success
-  res.render("contact.ejs", {
-    messageSent: showMessage ? "Message sent." : "",
-  });
-});
-
-// Mail routes (+rate limiter)
-
-app.post("/sendmail", mailLimiter, async (req, res) => {
-  const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-      user: process.env.MY_EMAIL,
-      pass: process.env.MY_AUTH,
-    },
-  });
-
-  const mailOptions = {
-    from: `"${req.body.email}" <${process.env.MY_EMAIL}>`,
-    replyTo: req.body.email,
-    to: process.env.MY_EMAIL,
-    subject: "New Message from Escriba",
-    text: req.body.message,
-  };
-
-  try {
-    await transporter.sendMail(mailOptions);
-    res.redirect("/contact?message=sent");
-  } catch (err) {
-    console.error("Email failed:", err);
-    res.status(500).send("Failed to send email.");
-  }
-});
-
-// blog routes
-
-app.get("/blog", (req, res) => {
-  res.render("blog.ejs", { posts });
 });
 
 app.post("/blogpost", (req, res) => {
@@ -183,16 +154,44 @@ app.post("/blogpost/delete", (req, res) => {
   res.redirect("/blog");
 });
 
+// Mail routes (+rate limiter)
+
+app.post("/sendmail", mailLimiter, async (req, res) => {
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.MY_EMAIL,
+      pass: process.env.MY_AUTH,
+    },
+  });
+
+  const mailOptions = {
+    from: `"${req.body.email}" <${process.env.MY_EMAIL}>`,
+    replyTo: req.body.email,
+    to: process.env.MY_EMAIL,
+    subject: "New Message from Escriba",
+    text: req.body.message,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    res.redirect("/contact?message=sent");
+  } catch (err) {
+    console.error("Email failed:", err);
+    res.status(500).send("Failed to send email.");
+  }
+});
+
 // Jest
 
 app.get("/health", (req, res) => res.status(200).json({ ok: true }));
 
-// 404 HANDLER
+// error handlers
+
 app.use((req, res) => {
   res.status(404).send("Not found");
 });
 
-// GENERAL ERR HANDLER
 app.use((err, req, res, next) => {
   console.error(err.stack || err);
   res.status(500).send("Something broke");
