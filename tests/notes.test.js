@@ -2,7 +2,7 @@ import { jest } from '@jest/globals';
 
 jest.unstable_mockModule('pg', async () => {
   const m = await import('./pg.mock.js');
-  return m.default; // exports object from CJS
+  return m.default; // exports object from ESM
 });
 const { default: pgMock } = await import('./pg.mock.js');
 const { __reset } = pgMock;
