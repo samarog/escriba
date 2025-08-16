@@ -52,9 +52,9 @@ MY_AUTH=your_gmail_app_password
 
 ### 4. **Run the App**
 ```bash
-node index.js
+node app.js
 OR
-nodemon index-js
+nodemon app.js
 ```
 
 The app will be available at `http://localhost:3000`.
@@ -67,7 +67,8 @@ The app will be available at `http://localhost:3000`.
 - **Frontend:** EJS templates, Bootstrap, FontAwesome
 - **Email:** Nodemailer (via Gmail SMTP)
 - **Styling:** Custom CSS (`main.css`)
-- **Data Handling:** In-memory storage (notes and blog posts stored in array)
+- **Data Handling:** In-memory storage (blog posts stored in array)
+- **Note Logging (Database-backed):** Add, view, and delete personal notes stored in a database for persistence.
 
 ---
 

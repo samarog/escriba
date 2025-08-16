@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 1.5.2 - 2025-08-16
+- Implement database-backed notes for persistance (SQL).
+
 ## 1.4.1 — 2025-08-11
 - Fix: `/blogpost` validation (`title?.trim()`, `content?.trim()`)
 - Fix: `/blog/delete` reads `req.body.id` (not `req.params.id`)
