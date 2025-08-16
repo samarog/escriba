@@ -1,12 +1,18 @@
-import request from "supertest";
-import app from "../app.js";
-jest.mock('pg', () => require('./pg.mock.js'));
+import { jest } from '@jest/globals';
+jest.unstable_mockModule('pg', () => import('./pg.mock.js'));
 
-it("adds a note and then sees it in /notes", async () => {
-  const postRes = await request(app).post("/post").type("form").send({ notepost: "Hello World" });
-  expect(postRes.statusCode).toBe(302); // redirect happens here
+const { __reset } = await import('./pg.mock.js');
+const { default: app } = await import('../app.js');
 
-  const notesRes = await request(app).get("/notes");
-  expect(notesRes.statusCode).toBe(200); // /notes renders the page
-  expect(notesRes.text).toContain("Hello World");
+import request from 'supertest';
+
+beforeEach(() => __reset());
+
+it('adds a note and then sees it in /notes', async () => {
+  const postRes = await request(app).post('/post').type('form').send({ notepost: 'Hello World' });
+  expect(postRes.statusCode).toBe(302);
+
+  const notesRes = await request(app).get('/notes');
+  expect(notesRes.statusCode).toBe(200);
+  expect(notesRes.text).toContain('Hello World');
 });
