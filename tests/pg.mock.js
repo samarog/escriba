@@ -1,5 +1,3 @@
-// tests/pg.mock.js  (ESM)
-
 const store = { notes: [] };
 
 function makeClient() {
@@ -27,24 +25,20 @@ function makeClient() {
 
 const client = makeClient();
 
-// Use classes so it works whether code does `new Pool()` / `new Client()` or plain calls
-class Client {
+export class Client {
   constructor() {
     return client;
   }
 }
-class Pool {
+export class Pool {
   constructor() {
     return client;
   }
 }
+export function __reset() {
+  store.notes = [];
+}
 
-const pgMock = {
-  Client,
-  Pool,
-  __reset() {
-    store.notes = [];
-  },
-};
-
-export default pgMock;
+// default export too (helps if code imports default from 'pg')
+const defaultExport = { Client, Pool, __reset };
+export default defaultExport;
