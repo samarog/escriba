@@ -239,7 +239,8 @@ input#email {
 
 /* Title: row 1 of column 2 */
 .div2 {
-  grid-area: 2 / 2 / 2 / 6;
+  grid-area: 2 / 2 / 3 / 6;
+  width: 95%;
 }
 
 /* Author: row 2 of column 2 */
