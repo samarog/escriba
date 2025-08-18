@@ -79,6 +79,14 @@ if (process.env.NODE_ENV !== "test") {
     });
 }
 
+export const closeDb = async () => {
+  try {
+    if (dbConnected) {
+      await db.end();
+      dbConnected = false;
+    }
+  } catch () {}};
+
 // root
 
 app.get("/", (req, res) => {
@@ -430,15 +438,5 @@ app.use((err, req, res, next) => {
   console.error(err.stack || err);
   res.status(500).send("Something broke");
 });
-
-// exports
-
-export const closeDb = async () => {
-  try {
-    if (dbConnected) {
-      await db.end();
-      dbConnected = false;
-    }
-  } catch () {}};
 
 export default app;
