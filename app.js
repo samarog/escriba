@@ -86,7 +86,7 @@ if (process.env.NODE_ENV !== "test") {
     .then(() => { __dbConnected = true; })
     .catch((e) => {
       console.error("DB connect failed:", e);
-      process.exit(1) in non-test envs
+      process.exit(1);
     });
 }
 
