@@ -169,7 +169,6 @@ app.get("/blog", async (req, res) => {
       ]),
     ]);
 
-    console.log(posts)
     const username = userResult.rows[0]?.name ?? req.user.email;
     const posts = postsResult.rows;
 
@@ -312,8 +311,8 @@ app.post("/blogpost", async (req, res) => {
   };
 
   const newPostOnDB = await db.query(
-    "INSERT INTO blog (title, content, author, user_id) VALUES ($1, $2, $3, $4)",
-    [newPost.title, newPost.content, newPost.author, userId]
+    "INSERT INTO blog (title, content, author, user_id) VALUES ($1, $2, $3, $4, $5)",
+    [newPost.title, newPost.content, newPost.author, newPost.date, userId]
   );
 
   posts.unshift(newPost);
