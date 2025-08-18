@@ -42,6 +42,7 @@ app.use(
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
       maxAge: 1000 * 60 * 60 * 24,
     },
   })
@@ -75,8 +76,10 @@ let dbConnected = false;
 if (process.env.NODE_ENV !== "test") {
   db.connect().then(() => { dbConnected = true; }).catch((e) => {
       console.error("db.connect failed:", e);
-      process.exit(1);
-    });
+      if (process.env.NODE_ENV === "production") {
+          process.exit(1);
+      }
+  });
 }
 
 export const closeDb = async () => {
@@ -348,10 +351,7 @@ app.post("/blogpost/delete", requireAuth, async (req, res) => {
   if (Number.isNaN(id)) {
     return res.status(400).send("Invalid id");
   } else {
-    await db.query("DELETE FROM blog WHERE id = $1 AND user_id = $2", [
-      id,
-      req.user.id,
-    ]);
+    await db.query("DELETE FROM blog WHERE id = $1 AND user_id = $2", [id, req.user.id]);
   }
   res.redirect("/blog");
 });
