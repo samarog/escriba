@@ -8,5 +8,5 @@ test("GET /health returns 200", async () => {
 });
 
 afterAll(async () => {
-  await closeDb(); // close pg.Client so Jest can exit
+  await closeDb();
 });
