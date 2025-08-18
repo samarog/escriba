@@ -75,8 +75,6 @@ const db = new pg.Client({
   port: process.env.PGPORT,
 });
 
-db.connect();
-
 // bloco para o jest test
 
 let __dbConnected = false;
