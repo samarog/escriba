@@ -1,5 +1,5 @@
 import request from "supertest";
-import app, { closeDb } from "../app";
+import app, { closeDb } from "../app.js";
 
 test("GET /health returns 200", async () => {
   const res = await request(app).get("/health");
