@@ -169,6 +169,7 @@ app.get("/blog", async (req, res) => {
       ]),
     ]);
 
+    console.log(posts)
     const username = userResult.rows[0]?.name ?? req.user.email;
     const posts = postsResult.rows;
 
