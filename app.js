@@ -89,8 +89,9 @@ export const closeDb = async () => {
       dbConnected = false;
     }
   } catch (err) {
-      console.error("Error closing DB:", err);
-    }
+    console.error("Error closing DB:", err);
+  }
+};
 
 // root
 
