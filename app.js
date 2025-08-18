@@ -10,10 +10,7 @@ import passport from "passport";
 import { Strategy } from "passport-local";
 import session from "express-session";
 import flash from "connect-flash";
-
 dotenv.config({ path: ".env" });
-
-// vars
 
 const app = express();
 const mailLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 10 });
@@ -33,11 +30,25 @@ let lastId = 1;
 
 // middleware
 
+if (!process.env.SESSION_SECRET) {
+  console.warn(
+    "SESSION_SECRET is missing! Using insecure fallback. Set it in .env and GitHub Secrets."
+  );
+}
+
+app.set("trust proxy", 1);
+
 app.use(
   session({
-    secret: process.env.SESSION_SECRET,
+    secret: process.env.SESSION_SECRET || "TOPSECRETWORD",
     resave: false,
     saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 1000 * 60 * 60 * 24,
+    },
   })
 );
 app.use(express.static("public"));
@@ -78,7 +89,7 @@ app.get("/login", (req, res) => {
   res.render("login.ejs", { warning });
 });
 
-app.get("/logout", (req, res) => {
+app.get("/logout", (req, res, next) => {
   req.logout(function (err) {
     if (err) {
       return next(err);
@@ -251,7 +262,7 @@ app.post(
   })
 );
 
-app.post("/post", async (req, res) => {
+app.post("/post", requireAuth, async (req, res) => {
   const post = req.body.notepost?.trim();
   const userId = req.user.id;
   if (post) {
@@ -263,14 +274,14 @@ app.post("/post", async (req, res) => {
   res.redirect("/dashboard");
 });
 
-app.post("/clear", async (req, res) => {
+app.post("/clear", requireAuth, async (req, res) => {
   const result = await db.query("DELETE FROM notes WHERE user_id = $1", [
     req.user.id,
   ]);
   res.redirect("/dashboard");
 });
 
-app.post("/delete", async (req, res) => {
+app.post("/delete", requireAuth, async (req, res) => {
   const idToDelete = parseInt(req.body.id);
   if (!isNaN(idToDelete)) {
     const result = await db.query(
@@ -281,7 +292,7 @@ app.post("/delete", async (req, res) => {
   res.redirect("/dashboard");
 });
 
-app.post("/notes/delete", async (req, res) => {
+app.post("/notes/delete", requireAuth, async (req, res) => {
   const idToDelete = parseInt(req.body.id);
   if (!isNaN(idToDelete)) {
     const result = await db.query(
@@ -292,7 +303,7 @@ app.post("/notes/delete", async (req, res) => {
   res.redirect("/notes");
 });
 
-app.post("/blogpost", async (req, res) => {
+app.post("/blogpost", requireAuth, async (req, res) => {
   const { title, content, author } = req.body;
   const userId = req.user.id;
 
@@ -311,7 +322,7 @@ app.post("/blogpost", async (req, res) => {
   };
 
   const newPostOnDB = await db.query(
-    "INSERT INTO blog (title, content, author, user_id) VALUES ($1, $2, $3, $4, $5)",
+    "INSERT INTO blog (title, content, author, date, user_id) VALUES ($1, $2, $3, $4, $5)",
     [newPost.title, newPost.content, newPost.author, newPost.date, userId]
   );
 
@@ -319,7 +330,7 @@ app.post("/blogpost", async (req, res) => {
   res.redirect("/blog");
 });
 
-app.post("/blogpost/delete", async (req, res) => {
+app.post("/blogpost/delete", requireAuth, async (req, res) => {
   // const findPostByIndex = posts.findIndex(
   //   (p) => p.id === parseInt(req.body.id)
   // );
@@ -327,7 +338,7 @@ app.post("/blogpost/delete", async (req, res) => {
   //   return res.status(404).json({ error: "Error. Couldn't delete." });
   // posts.splice(findPostByIndex, 1);
 
-  const id = req.body.id;
+  const id = parseInt(req.body.id);
   if (Number.isNaN(id)) {
     return res.status(400).send("Invalid id");
   } else {
@@ -341,7 +352,7 @@ app.post("/blogpost/delete", async (req, res) => {
 
 // Mail routes (+rate limiter)
 
-app.post("/sendmail", mailLimiter, async (req, res) => {
+app.post("/sendmail", requireAuth, mailLimiter, async (req, res) => {
   const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
@@ -398,6 +409,12 @@ passport.use(
     }
   })
 );
+
+// safeguard para as POST routes
+
+const requireAuth = (req, res, next) =>
+  req.isAuthenticated() ? next() : res.redirect("/login");
+
 // serialization cycle
 
 passport.serializeUser((user, cb) => {
