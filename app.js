@@ -197,6 +197,11 @@ app.get("/blog", async (req, res) => {
 
 // POST routes
 
+// safeguard para as POST routes
+
+const requireAuth = (req, res, next) =>
+  req.isAuthenticated() ? next() : res.redirect("/login");
+
 app.post("/register", async (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
@@ -410,11 +415,6 @@ passport.use(
     }
   })
 );
-
-// safeguard para as POST routes
-
-const requireAuth = (req, res, next) =>
-  req.isAuthenticated() ? next() : res.redirect("/login");
 
 // serialization cycle
 
