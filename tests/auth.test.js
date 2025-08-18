@@ -1,5 +1,5 @@
 import request from "supertest";
-import app from "../app";
+import app, { closeDb } from "../app";
 
 const agent = request.agent(app);
 
@@ -9,9 +9,9 @@ const password = "qwerty";
 async function registerAndLogin() {
   await agent
     .post("/register")
-    .type("form") 
+    .type("form")
     .send({ email, password })
-    .expect(302); 
+    .expect(302);
 
   await agent
     .post("/login")
@@ -25,6 +25,10 @@ describe("Notes routes", () => {
     await registerAndLogin();
   });
 
+  afterAll(async () => {
+    await closeDb();
+  });
+
   it("should redirect unauthenticated requests", async () => {
     const res = await request(app).get("/notes");
     expect(res.statusCode).toBe(302);
@@ -34,6 +38,6 @@ describe("Notes routes", () => {
   it("should show notes page for logged-in user", async () => {
     const res = await agent.get("/notes");
     expect(res.statusCode).toBe(200);
-    expect(res.text).toContain('value="Clear & Leave"');
+    expect(res.text).toContain('value="Clear & Leave"'); // adjust if needed
   });
 });
