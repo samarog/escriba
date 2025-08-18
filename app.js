@@ -10,6 +10,7 @@ import passport from "passport";
 import { Strategy } from "passport-local";
 import session from "express-session";
 import flash from "connect-flash";
+
 dotenv.config({ path: ".env" });
 
 const app = express();
