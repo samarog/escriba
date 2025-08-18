@@ -8,6 +8,7 @@ import pg from "pg";
 import bcrypt from "bcrypt";
 import passport from "passport";
 import { Strategy } from "passport-local";
+import GoogleStrategy from "passport-google-oauth2";
 import session from "express-session";
 import flash from "connect-flash";
 
@@ -78,15 +79,6 @@ app.get("/login", (req, res) => {
   res.render("login.ejs", { warning });
 });
 
-app.get("/logout", (req, res) => {
-  req.logout(function (err) {
-    if (err) {
-      return next(err);
-    }
-    res.redirect("/");
-  });
-});
-
 app.get("/register", (req, res) => {
   const warning = "";
   res.render("register.ejs", { warning });
@@ -97,16 +89,14 @@ app.get("/profile", (req, res) => {
 });
 
 app.get("/dashboard", async (req, res) => {
-  console.log(req.user);
+      console.log(req.user);
   if (!req.isAuthenticated()) {
     return res.redirect("/");
   } else {
     const userinfo = await db.query("SELECT * FROM users WHERE email = $1", [
       req.user.email,
     ]);
-    const { rows } = await db.query("SELECT * FROM notes WHERE user_id = $1", [
-      req.user.id,
-    ]);
+    const { rows } = await db.query("SELECT * FROM notes WHERE user_id = $1", [req.user.id]);
     const notes = rows;
     const username = userinfo.rows[0].name;
     console.log(notes);
@@ -133,10 +123,7 @@ app.get("/notes", async (req, res) => {
     return res.redirect("/");
   } else {
     try {
-      const { rows } = await db.query(
-        "SELECT * FROM notes WHERE user_id = $1",
-        [req.user.id]
-      );
+      const { rows } = await db.query("SELECT * FROM notes WHERE user_id = $1", [req.user.id]);
       const notes = rows;
       res.render("notes.ejs", { notes });
     } catch (error) {
@@ -160,28 +147,14 @@ app.get("/contact", (req, res) => {
 });
 
 app.get("/blog", async (req, res) => {
-  if (!req.isAuthenticated()) return res.redirect("/");
+  if (!req.isAuthenticated()) {
+    return res.redirect('/')
+  } else {
 
-  try {
-    // do both DB calls in parallel with a Promisse.all // +efficiency, less retrieving time
-    const [userResult, postsResult] = await Promise.all([
-      db.query("SELECT name FROM users WHERE id = $1", [req.user.id]),
-      db.query("SELECT * FROM blog WHERE user_id = $1 ORDER BY id DESC", [
-        req.user.id,
-      ]),
-    ]);
-
-    const username = userResult.rows[0]?.name ?? req.user.email;
-    const posts = postsResult.rows;
-
-    return res.render("blog.ejs", { posts, username, error: null });
-  } catch (err) {
-    console.error(err);
-    return res.render("blog.ejs", {
-      posts: [],
-      username: req.user?.email ?? "User",
-      error: "Posts couldn't be fetched from the database.",
-    });
+  const email = req.user.email
+  const userinfo  = await db.query("SELECT * FROM users WHERE email = $1", [email])
+  const username = userinfo.rows[0].name
+  res.render("blog.ejs", { posts, username });
   }
 });
 
@@ -257,30 +230,26 @@ app.post(
 
 app.post("/post", async (req, res) => {
   const post = req.body.notepost?.trim();
-  const userId = req.user.id;
+  const userId = req.user.id
   if (post) {
-    const result = await db.query(
-      "INSERT INTO notes (title, user_id) VALUES ($1, $2)",
-      [post, userId]
-    );
+    const result = await db.query("INSERT INTO notes (title, user_id) VALUES ($1, $2)", [
+      post, userId
+    ]);
   }
   res.redirect("/dashboard");
 });
 
 app.post("/clear", async (req, res) => {
-  const result = await db.query("DELETE FROM notes WHERE user_id = $1", [
-    req.user.id,
-  ]);
+  const result = await db.query("DELETE FROM notes");
   res.redirect("/dashboard");
 });
 
 app.post("/delete", async (req, res) => {
   const idToDelete = parseInt(req.body.id);
   if (!isNaN(idToDelete)) {
-    const result = await db.query(
-      "DELETE FROM notes WHERE id = $1 AND user_id = $2",
-      [idToDelete, req.user.id]
-    );
+    const result = await db.query("DELETE FROM notes WHERE id = $1", [
+      idToDelete,
+    ]);
   }
   res.redirect("/dashboard");
 });
@@ -288,17 +257,15 @@ app.post("/delete", async (req, res) => {
 app.post("/notes/delete", async (req, res) => {
   const idToDelete = parseInt(req.body.id);
   if (!isNaN(idToDelete)) {
-    const result = await db.query(
-      "DELETE FROM notes WHERE id = $1 AND user_id = $2",
-      [idToDelete, req.user.id]
-    );
+    const result = await db.query("DELETE FROM notes WHERE id = $1", [
+      idToDelete,
+    ]);
   }
   res.redirect("/notes");
 });
 
-app.post("/blogpost", async (req, res) => {
+app.post("/blogpost", (req, res) => {
   const { title, content, author } = req.body;
-  const userId = req.user.id;
 
   if (!title?.trim() || !content?.trim()) {
     // lembra-te do operador '?' para evitar curto-circuito.
@@ -314,32 +281,17 @@ app.post("/blogpost", async (req, res) => {
     date: today || "Timeless",
   };
 
-  const newPostOnDB = await db.query(
-    "INSERT INTO blog (title, content, author, date, user_id) VALUES ($1, $2, $3, $4, $5)",
-    [newPost.title, newPost.content, newPost.author, newPost.date, userId]
-  );
-
   posts.unshift(newPost);
   res.redirect("/blog");
 });
 
-app.post("/blogpost/delete", async (req, res) => {
-  // const findPostByIndex = posts.findIndex(
-  //   (p) => p.id === parseInt(req.body.id)
-  // );
-  // if (findPostByIndex === -1)
-  //   return res.status(404).json({ error: "Error. Couldn't delete." });
-  // posts.splice(findPostByIndex, 1);
-
-  const id = req.body.id;
-  if (Number.isNaN(id)) {
-    return res.status(400).send("Invalid id");
-  } else {
-    await db.query("DELETE FROM blog WHERE id = $1 AND user_id = $2", [
-      id,
-      req.user.id,
-    ]);
-  }
+app.post("/blogpost/delete", (req, res) => {
+  const findPostByIndex = posts.findIndex(
+    (p) => p.id === parseInt(req.body.id)
+  );
+  if (findPostByIndex === -1)
+    return res.status(404).json({ error: "Error. Couldn't delete." });
+  posts.splice(findPostByIndex, 1);
   res.redirect("/blog");
 });
 

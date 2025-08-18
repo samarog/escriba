@@ -2,7 +2,7 @@
 <%- include('partials/header.ejs') %>
 
 
-<h4><i class="fa fa-align-left px-2"></i>My blog:</h4>
+<h4><i class="fa fa-align-left px-2"></i><%= username %>'s blog:</h4>
 
 
   <div class="blog-mobile">
@@ -55,6 +55,8 @@
   </div>
   <% }) %>
 </div>
-
+<% if (error && error.length > 0) { %>
+  <div style="margin-top: -25px;"><%= error %></div>
+<% } %>
 <%- include('partials/footer.ejs') %>
 </div>

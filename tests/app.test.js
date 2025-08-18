@@ -1,16 +1,5 @@
-import { jest } from '@jest/globals';
-
-jest.unstable_mockModule('pg', async () => {
-  const m = await import('./pg.mock.js');
-  return { __esModule: true, ...m, default: m.default };
-});
-
-const { __reset } = await import('pg');
-const { default: app } = await import('../app.js');
-
-import request from 'supertest';
-
-beforeEach(() => __reset());
+import request from "supertest";
+import app from "../app";
 
 test('GET /health returns 200', async () => {
   const res = await request(app).get('/health');
