@@ -196,7 +196,6 @@ app.get("/blog", async (req, res) => {
 });
 
 // POST routes
-
 // safeguard para as POST routes
 
 const requireAuth = (req, res, next) =>
@@ -441,4 +440,5 @@ app.use((err, req, res, next) => {
   res.status(500).send("Something broke");
 });
 
+export const closeDb = async () => db.end();
 export default app;
