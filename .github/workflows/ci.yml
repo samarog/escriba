@@ -10,6 +10,21 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: escriba_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres -d escriba_test"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=15
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -17,13 +32,47 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'   # matches your package.json "engines"
+          node-version: '20'
           cache: 'npm'
+
+      - name: Install PostgreSQL client (psql)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
 
       - name: Install deps
         run: npm ci
 
+      # CI DB creds (service container). Your local .env stays on 5433.
+      - name: Export env (PG vars)
+        run: |
+          echo "NODE_ENV=test" >> $GITHUB_ENV
+          echo "SESSION_SECRET=${{ secrets.SESSION_SECRET }}" >> $GITHUB_ENV
+          echo "PGUSER=postgres" >> $GITHUB_ENV
+          echo "PGPASSWORD=postgres" >> $GITHUB_ENV
+          echo "PGHOST=localhost" >> $GITHUB_ENV
+          echo "PGDATABASE=escriba_test" >> $GITHUB_ENV
+          echo "PGPORT=5432" >> $GITHUB_ENV
+
+      - name: Wait for Postgres
+        run: |
+          for i in {1..30}; do
+            if PGPASSWORD=postgres psql -h localhost -U postgres -d escriba_test -c "SELECT 1;" >/dev/null 2>&1; then
+              echo "Postgres is up"; break
+            fi
+            echo "Waiting for Postgres... ($i/30)"; sleep 2
+          done
+
+      - name: Run migrations
+        run: npm run migrate || echo "No migration script; skipping"
+
       - name: Run tests
         env:
           NODE_ENV: test
+          SESSION_SECRET: ${{ env.SESSION_SECRET }}
+          PGUSER: ${{ env.PGUSER }}
+          PGPASSWORD: ${{ env.PGPASSWORD }}
+          PGHOST: ${{ env.PGHOST }}
+          PGDATABASE: ${{ env.PGDATABASE }}
+          PGPORT: ${{ env.PGPORT }}
         run: npm test
