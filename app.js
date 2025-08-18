@@ -311,8 +311,8 @@ app.post("/blogpost", async (req, res) => {
   };
 
   const newPostOnDB = await db.query(
-    "INSERT INTO blog (title, content, author, date, user_id) VALUES ($1, $2, $3, $4, $5)",
-    [newPost.title, newPost.content, newPost.author, newPost.date, userId]
+    "INSERT INTO blog (title, content, author, user_id) VALUES ($1, $2, $3, $4)",
+    [newPost.title, newPost.content, newPost.author, userId]
   );
 
   posts.unshift(newPost);
