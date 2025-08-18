@@ -42,7 +42,6 @@ app.use(
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
       maxAge: 1000 * 60 * 60 * 24,
     },
   })
@@ -76,9 +75,7 @@ let dbConnected = false;
 if (process.env.NODE_ENV !== "test") {
   db.connect().then(() => { dbConnected = true; }).catch((e) => {
       console.error("db.connect failed:", e);
-      if (process.env.NODE_ENV === "production") {
-          process.exit(1);
-      }
+      process.exit(1);
   });
 }
 
