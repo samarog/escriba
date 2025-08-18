@@ -22,7 +22,7 @@ let posts = [
     id: 1,
     title: "Sustainable living: Tips for an eco-friendly lifestyle",
     content:
-      "Sustainability is more than just a buzzword; it's a way of life. As the effects of climate change become more pronounced, there's a growing realization about the need to live sustainably. From reducing waste and conserving energy to supporting eco-friendly products, there are numerous ways we can make our daily lives more environmentally friendly. This post will explore practical tips and habits that can make a significant difference.",
+      "As the effects of climate change become more pronounced, there's a growing realization about the need to live sustainably. From reducing waste and conserving energy to supporting eco-friendly products, there are numerous ways we can make our daily lives more environmentally friendly.",
     author: "Gonçalo Amaro",
     date: "2025-08-07",
   },
@@ -32,13 +32,9 @@ let lastId = 1;
 // middleware
 
 if (!process.env.SESSION_SECRET) {
-  console.warn(
-    "SESSION_SECRET is missing! Using insecure fallback. Set it in .env and GitHub Secrets."
-  );
+  console.warn("SESSION_SECRET is missing! Using insecure fallback. Set it in .env and GitHub Secrets.");
 }
-
 app.set("trust proxy", 1);
-
 app.use(
   session({
     secret: process.env.SESSION_SECRET || "TOPSECRETWORD",
@@ -46,8 +42,6 @@ app.use(
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
       maxAge: 1000 * 60 * 60 * 24,
     },
   })
@@ -75,29 +69,15 @@ const db = new pg.Client({
   port: process.env.PGPORT,
 });
 
-// bloco para o jest test
+// jest test
 
-let __dbConnected = false;
-
+let dbConnected = false;
 if (process.env.NODE_ENV !== "test") {
-  db.connect()
-    .then(() => { __dbConnected = true; })
-    .catch((e) => {
-      console.error("DB connect failed:", e);
+  db.connect().then(() => { dbConnected = true; }).catch((e) => {
+      console.error("db.connect failed:", e);
       process.exit(1);
     });
 }
-
-export const closeDb = async () => {
-  try {
-    if (__dbConnected) {
-      await db.end();
-      __dbConnected = false;
-    }
-  } catch (_) {
-    // ignore
-  }
-};
 
 // root
 
@@ -134,12 +114,8 @@ app.get("/dashboard", async (req, res) => {
   if (!req.isAuthenticated()) {
     return res.redirect("/");
   } else {
-    const userinfo = await db.query("SELECT * FROM users WHERE email = $1", [
-      req.user.email,
-    ]);
-    const { rows } = await db.query("SELECT * FROM notes WHERE user_id = $1", [
-      req.user.id,
-    ]);
+    const userinfo = await db.query("SELECT * FROM users WHERE email = $1", [req.user.email]);
+    const { rows } = await db.query("SELECT * FROM notes WHERE user_id = $1", [req.user.id]);
     const notes = rows;
     const username = userinfo.rows[0].name;
     try {
@@ -184,7 +160,7 @@ app.get("/contact", (req, res) => {
   if (!req.isAuthenticated()) {
     return res.redirect("/");
   } else {
-    const showMessage = req.query.message === "sent"; // check if message=success
+    const showMessage = req.query.message === "sent";
     res.render("contact.ejs", {
       messageSent: showMessage ? "Message sent." : "",
     });
@@ -198,9 +174,7 @@ app.get("/blog", async (req, res) => {
     // do both DB calls in parallel with a Promisse.all // +efficiency, less retrieving time
     const [userResult, postsResult] = await Promise.all([
       db.query("SELECT name FROM users WHERE id = $1", [req.user.id]),
-      db.query("SELECT * FROM blog WHERE user_id = $1 ORDER BY id DESC", [
-        req.user.id,
-      ]),
+      db.query("SELECT * FROM blog WHERE user_id = $1 ORDER BY id DESC", [req.user.id]),
     ]);
 
     const username = userResult.rows[0]?.name ?? req.user.email;
@@ -218,19 +192,18 @@ app.get("/blog", async (req, res) => {
 });
 
 // POST routes
-// safeguard para as POST routes
+
+// auth guardrail to POST routes
 
 const requireAuth = (req, res, next) =>
-  req.isAuthenticated() ? next() : res.redirect("/login");
+  req.isAuthenticated() ? next() : res.redirect("/");
 
 app.post("/register", async (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
 
   try {
-    const checkResult = await db.query("SELECT * FROM users WHERE email = $1", [
-      email,
-    ]);
+    const checkResult = await db.query("SELECT * FROM users WHERE email = $1", [email]);
     if (checkResult.rows.length > 0) {
       const warning = "Email already in use.";
       res.render("register.ejs", { warning: warning });
@@ -240,9 +213,7 @@ app.post("/register", async (req, res) => {
           console.error("Error hashing password:", err);
         } else {
           const result = await db.query(
-            "INSERT INTO users (email, password) VALUES ($1, $2) RETURNING *",
-            [email, hash]
-          );
+            "INSERT INTO users (email, password) VALUES ($1, $2) RETURNING *", [email, hash]);
           const user = result.rows[0];
           req.login(user, (err) => {
             console.log("success");
@@ -302,9 +273,7 @@ app.post("/post", requireAuth, async (req, res) => {
 });
 
 app.post("/clear", requireAuth, async (req, res) => {
-  const result = await db.query("DELETE FROM notes WHERE user_id = $1", [
-    req.user.id,
-  ]);
+  const result = await db.query("DELETE FROM notes WHERE user_id = $1", [req.user.id]);
   res.redirect("/dashboard");
 });
 
@@ -334,8 +303,7 @@ app.post("/blogpost", requireAuth, async (req, res) => {
   const { title, content, author } = req.body;
   const userId = req.user.id;
 
-  if (!title?.trim() || !content?.trim()) {
-    // lembra-te do operador '?' para evitar curto-circuito.
+  if (!title?.trim() || !content?.trim()) { // lembra-te do operador '?' para evitar curto-circuito.
     return res.status(400).send("Title/content required.");
   }
 
@@ -358,6 +326,7 @@ app.post("/blogpost", requireAuth, async (req, res) => {
 });
 
 app.post("/blogpost/delete", requireAuth, async (req, res) => {
+  
   // const findPostByIndex = posts.findIndex(
   //   (p) => p.id === parseInt(req.body.id)
   // );
@@ -447,7 +416,7 @@ passport.deserializeUser((user, cb) => {
   cb(null, user);
 });
 
-// Jest
+// health-check (jest test)
 
 app.get("/health", (req, res) => res.status(200).json({ ok: true }));
 
@@ -461,5 +430,15 @@ app.use((err, req, res, next) => {
   console.error(err.stack || err);
   res.status(500).send("Something broke");
 });
+
+// exports
+
+export const closeDb = async () => {
+  try {
+    if (dbConnected) {
+      await db.end();
+      dbConnected = false;
+    }
+  } catch () {}};
 
 export default app;
