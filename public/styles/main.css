@@ -1,4 +1,5 @@
 html {
+  height: 100%;
   overflow: hidden;
 }
 
@@ -9,6 +10,8 @@ body {
   background-color: #444;
   font-family: "Didact Gothic";
   color: tomato;
+  height: 100%;
+  overflow-y: auto;
 }
 
 /* filtro para o bg */
@@ -39,6 +42,159 @@ main {
   z-index: 999;
 }
 
+.container-modal {
+  height: 100dvh;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.modal {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(1);
+  height: 30dvh;
+  width: 30dvh;
+  min-width: 300px;
+  min-height: 300px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  background: transparent;
+  border: 2px dashed tomato;
+  border-radius: 16px;
+  color: tomato;
+  padding: 2rem;
+  gap: 0.7rem;
+}
+
+.modal-login {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(1);
+  height: 40dvh;
+  width: 50dvh;
+  min-width: 300px;
+  min-height: 250px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  background: #2222228e;
+  border: 2px dashed tomato;
+  border-radius: 16px;
+  color: tomato;
+  padding: 2rem;
+  gap: 2rem;
+}
+
+@keyframes slow-zoom {
+  from {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(1deg) scale(1.15);
+  }
+}
+
+.modal:hover {
+  transform: translate(-50%, -49%) rotate(1deg) scale(1.05);
+  box-shadow: 0 0 20px rgba(255, 99, 71, 0.6);
+  border-color: tomato;
+  animation: slow-zoom 22s ease-in-out infinite alternate;
+  transition: transform 0.5s ease, box-shadow 0.4s ease, border-color 0.3s ease;
+}
+
+.modal-login > input:hover {
+  box-shadow: 0 0 20px rgba(255, 99, 71, 0.6);
+  border-color: tomato;
+}
+
+.register-btn,
+.login-btn {
+  color: tomato;
+  position: sticky;
+  top: 0;
+  padding-top: 20px;
+  z-index: 999;
+}
+
+.modal form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.8rem;
+}
+
+.modal input {
+  background: transparent;
+  border: 2px dashed tomato;
+  border-radius: 12px;
+  padding: 0.6rem 1rem;
+  color: tomato;
+  outline: none;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.modal input::placeholder {
+  color: rgba(255, 99, 71, 0.7);
+}
+
+.modal input:focus {
+  border-color: tomato;
+  box-shadow: 0 0 12px rgba(255, 99, 71, 0.5);
+  background: transparent;
+}
+
+.modal-login form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.8rem;
+}
+
+.modal-login input {
+  background: transparent;
+  border: 2px dashed tomato;
+  border-radius: 12px;
+  padding: 0.6rem 1rem;
+  color: tomato;
+  outline: none;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.modal-login input::placeholder {
+  color: rgba(255, 99, 71, 0.7);
+}
+
+.modal-login input:focus {
+  border-color: tomato;
+  box-shadow: 0 0 12px rgba(255, 99, 71, 0.5);
+}
+
+/* button matches tomato style */
+.tomato-btn {
+  background: transparent;
+  color: tomato;
+  border: 2px solid tomato;
+  border-radius: 12px;
+  padding: 0.6rem 1.2rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.tomato-btn:hover {
+  background: tomato;
+  color: #111;
+  box-shadow: 0 0 12px rgba(255, 99, 71, 0.5);
+}
+
 .navbar a {
   color: tomato;
 }
@@ -64,7 +220,7 @@ h1 {
   color: wheat;
   margin: 25px;
   padding: 20px;
-  background-color: #777;
+  background-color: #777777a9;
   text-align: start;
   border-radius: 25px;
 }
@@ -77,7 +233,7 @@ h1 {
   color: wheat;
   margin: 25px;
   padding: 20px;
-  background-color: #777;
+  background-color: #777777a9;
   text-align: start;
   border-radius: 25px;
 }
@@ -96,12 +252,20 @@ h1 {
 }
 
 #txt::placeholder {
-  color: #555;
+  color: #ac977b;
   opacity: 1;
 }
 #txt2::placeholder {
-  color: #555;
+  color: #ac977b;
   opacity: 1;
+}
+
+.notebg {
+  max-width: 80%;
+  background-color: #777777a9;
+  text-align: start;
+  border-radius: 16px;
+  padding: 2%;
 }
 
 .blog-container {
@@ -184,7 +348,7 @@ input {
   color: wheat;
   cursor: pointer;
   border: 1px solid wheat;
-  border-radius: 5px;
+  border-radius: 16px;
 }
 
 input:hover {
@@ -197,11 +361,13 @@ input:hover {
   color: wheat;
   cursor: pointer;
   border: 1px solid wheat;
-  border-radius: 5px;
+  border-radius: 16px;
 }
 
 input#email {
   border: none;
+  background-color: #777777a9;
+  border-radius: 16px;
 }
 
 .input-stack {
@@ -232,28 +398,19 @@ input#email {
   grid-row-gap: 10px;
 }
 
-/* Content: tall left column */
 .div1 {
   grid-area: 1 / 1 / 7 / 2;
 }
-
-/* Title: row 1 of column 2 */
 .div2 {
   grid-area: 2 / 2 / 3 / 6;
   width: 95%;
 }
-
-/* Author: row 2 of column 2 */
 .div4 {
   grid-area: 3 / 2 / 3 / 4;
 }
-
-/* Date: row 3 of column 2 */
 .div5 {
   grid-area: 4 / 2 / 4 / 3;
 }
-
-/* Submit button: bottom right cell */
 .div3 {
   grid-area: 5 / 2 / 5 / 3;
 }
@@ -338,22 +495,20 @@ footer {
     margin-bottom: 35px;
   }
 
-  /* Make controls actually fit */
   .parent textarea,
   .parent input[type="text"],
   .parent input[type="submit"] {
     width: 100%;
     max-width: 100%;
-    min-width: 0; /* avoids overflow from long content */
+    min-width: 0;
   }
 
   .parent input[type="submit"] {
     display: block;
-    align-self: center; /* full width button */
+    align-self: center; 
   }
 }
 
-/* Optional: two-columns for midsize tablets only */
 @media (min-width: 700px) and (max-width: 999px) {
   .parent {
     display: flex;
@@ -361,6 +516,10 @@ footer {
 }
 
 @media (max-width: 680px) {
+  div.log {
+    padding: 5%;
+  }
+
   .blog-mobile {
     width: 90%;
   }
@@ -380,5 +539,41 @@ footer {
     max-width: 100% !important;
     margin: 0 !important;
     display: block;
+  }
+
+  .modal-login {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(1);
+    height: 30dvh;
+    width: 40dvh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    background: #2222228e;
+    border: 2px dashed tomato;
+    border-radius: 16px;
+    color: tomato;
+    padding: 2rem;
+    gap: 2rem;
+  }
+
+  .modal-login form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.24rem;
+  }
+
+  .modal-login input {
+    background: transparent;
+    border: 2px dashed tomato;
+    border-radius: 12px;
+    padding: 0.6rem 1rem;
+    color: tomato;
+    outline: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
   }
 }

@@ -12,9 +12,9 @@
 </form>
   </div>
   
-<div class="log"> <h4>Don't forget:</h4>
+<div class="log"> <h4><%= username %>'s notes:</h4>
 <% if (notes && notes.length > 0) { %>
-  <ul>
+  <ul class="notebg">
     <% notes.forEach((note, i) => { %>
       <li class="note-item">
         <form action="/delete" method="POST" class="note-form" data-note-index="<%= i %>">
