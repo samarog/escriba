@@ -97,7 +97,6 @@ app.get("/profile", (req, res) => {
 });
 
 app.get("/dashboard", async (req, res) => {
-  console.log(req.user);
   if (!req.isAuthenticated()) {
     return res.redirect("/");
   } else {
@@ -109,7 +108,6 @@ app.get("/dashboard", async (req, res) => {
     ]);
     const notes = rows;
     const username = userinfo.rows[0].name;
-    console.log(notes);
     try {
       const quote = await axios.get("https://zenquotes.io/api/today");
       const fullQuote = {
@@ -195,8 +193,6 @@ app.post("/register", async (req, res) => {
     const checkResult = await db.query("SELECT * FROM users WHERE email = $1", [
       email,
     ]);
-    console.log(checkResult);
-
     if (checkResult.rows.length > 0) {
       const warning = "Email already in use.";
       res.render("register.ejs", { warning: warning });
