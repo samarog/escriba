@@ -77,6 +77,30 @@ const db = new pg.Client({
 
 db.connect();
 
+// bloco para o jest test
+
+let __dbConnected = false;
+
+if (process.env.NODE_ENV !== "test") {
+  db.connect()
+    .then(() => { __dbConnected = true; })
+    .catch((e) => {
+      console.error("DB connect failed:", e);
+      process.exit(1) in non-test envs
+    });
+}
+
+export const closeDb = async () => {
+  try {
+    if (__dbConnected) {
+      await db.end();
+      __dbConnected = false;
+    }
+  } catch (_) {
+    // ignore
+  }
+};
+
 // root
 
 app.get("/", (req, res) => {
