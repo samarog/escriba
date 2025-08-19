@@ -16,7 +16,7 @@ dotenv.config({ path: ".env" });
 const app = express();
 const mailLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 10 });
 const saltRounds = 10;
-const today = new Date().toISOString().split("T")[0];
+const today = new Date().toLocaleDateString("en-CA", { timeZone: "Europe/Lisbon" });
 let posts = [
   {
     id: 1,
