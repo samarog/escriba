@@ -139,6 +139,7 @@ app.get("/dashboard", async (req, res) => {
     } catch (error) {
       res.render("dashboard.ejs", {
         notes: notes,
+        username: username,
         message: "Failed to load quote.",
         author: "Sorry",
         content: JSON.stringify(error),
