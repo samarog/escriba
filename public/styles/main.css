@@ -594,3 +594,14 @@ footer {
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
   }
 }
+
+@media (max-height: 866px) {
+  .modal-container {
+    min-height: 99vh;  
+    max-height: 100vh; 
+}
+  .modal-login {
+    min-height: 60vh;
+    max-height: 75vh; 
+  }
+}
