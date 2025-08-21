@@ -601,7 +601,20 @@ footer {
     max-height: 100vh; 
 }
   .modal-login {
-    min-height: 60vh;
-    max-height: 75vh; 
+    min-height: 59vh;
+    max-height: 65vh;
+    gap: 1.5rem;
+  }
+}
+
+@media (max-height: 566px) {
+  .modal-container {
+    min-height: 99vh;  
+    max-height: 100vh; 
+}
+  .modal-login {
+    min-height: 69vh;
+    max-height: 75vh;
+    gap: 1.25rem;
   }
 }
