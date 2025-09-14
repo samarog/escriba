@@ -32,16 +32,15 @@ let lastId = 1;
 // middleware
 
 if (!process.env.SESSION_SECRET) {
-  console.warn("SESSION_SECRET is missing! Using insecure fallback. Set it in .env and GitHub Secrets.");
+  console.warn("SESSION_SECRET not found!! Usar fallback");
 }
 app.set("trust proxy", 1);
 app.use(
   session({
     secret: process.env.SESSION_SECRET || "TOPSECRETWORD",
-    resave: false,
-    saveUninitialized: false,
+    saveUninitialized: false, // +p
     cookie: {
-      httpOnly: true,
+      httpOnly: true, // +s
       maxAge: 1000 * 60 * 60 * 24,
     },
   })
@@ -74,7 +73,7 @@ const db = new pg.Client({
 let dbConnected = false;
 if (process.env.NODE_ENV !== "test") {
   db.connect().then(() => { dbConnected = true; }).catch((e) => {
-      console.error("db.connect failed:", e);
+      console.error("db.connect failed!! ", e);
       process.exit(1);
   });
 }
@@ -86,7 +85,7 @@ export const closeDb = async () => {
       dbConnected = false;
     }
   } catch (err) {
-    console.error("Error closing DB:", err);
+    console.error("Error closing DB!! ", err);
   }
 };
 
@@ -153,10 +152,7 @@ app.get("/notes", async (req, res) => {
     return res.redirect("/");
   } else {
     try {
-      const { rows } = await db.query(
-        "SELECT * FROM notes WHERE user_id = $1",
-        [req.user.id]
-      );
+      const { rows } = await db.query("SELECT * FROM notes WHERE user_id = $1", [req.user.id]);
       const notes = rows;
       res.render("notes.ejs", { notes });
     } catch (error) {
@@ -247,10 +243,7 @@ app.post("/profile", async (req, res) => {
   const name = req.body.name;
   const email = req.user.email;
 
-  if (!name?.trim()) {
-    // only call trim() if name is NOT missing or empty/whitespace. if name is a string, call trim() // adding ! flips the logic, means 'if this name?.trim() is falsy. geez this is confusing.
-    return res.status(400).send("Name is required");
-  } else {
+  if (name?.trim()) {
     try {
       await db.query("UPDATE users SET name = $1 WHERE email = $2", [
         name,
@@ -260,12 +253,13 @@ app.post("/profile", async (req, res) => {
     } catch (err) {
       console.log(err);
     }
+
+  } else {
+        return res.status(400).send("Name is required");
   }
 });
 
-app.post(
-  "/login",
-  passport.authenticate("local", {
+app.post("/login",  passport.authenticate("local", {
     successRedirect: "/dashboard",
     failureRedirect: "/login",
     failureFlash: true,
@@ -385,17 +379,11 @@ app.post("/sendmail", requireAuth, mailLimiter, async (req, res) => {
 
 passport.use(
   "local",
-  new Strategy({ usernameField: "email" }, async function verify(
-    email,
-    password,
-    cb
-  ) {
+  new Strategy({ usernameField: "email" }, async function verify(email, password, cb) {
     try {
-      const result = await db.query("SELECT * FROM users WHERE email = $1", [
-        email,
-      ]);
+      const result = await db.query("SELECT * FROM users WHERE email = $1", [email]);
       if (result.rows.length === 0) {
-        // auth failure on email prob
+        // auth failure on email prob, então:
         return cb(null, false, { message: "User not found" });
       }
 
@@ -405,9 +393,9 @@ passport.use(
           return cb(err);
         }
         if (!valid) {
-          return cb(null, false, { message: "Invalid password" }); // pass failure
+          return cb(null, false, { message: "Invalid password" }); // pass fail
         }
-        return cb(null, user); // great success!
+        return cb(null, user); // great success!!
       });
     } catch (err) {
       return cb(err);
@@ -424,6 +412,18 @@ passport.serializeUser((user, cb) => {
 passport.deserializeUser((user, cb) => {
   cb(null, user);
 });
+
+// POST /login
+//    v
+// passport.authenticate("local")
+//    v
+// verify(email, password, cb)
+//    v
+// falhou? -> cb(null, false) -> redirect /login
+// correu bem? -> cb(null, user) --> serializeUser -> sessão
+//    v
+// Request seguinte --> sessão lida --> deserializeUser -> req.user
+
 
 // health-check (jest test)
 
